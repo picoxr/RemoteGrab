@@ -44,10 +44,16 @@ public class AttachTest : MonoBehaviour
     //The current state of motion of the object
     private bool moveState = false;
 
-    private Vector3 currentPosition;
-    private Vector3 lastPosition;
-    private Vector3 movementDirection;
-    
+    //private Vector3 currentPosition;
+    //private Vector3 lastPosition;
+    //private Vector3 movementDirection;
+
+    private Vector3 angularVelocity;
+    private Vector3 linearVelocity;
+
+    private Vector3 angularVelocityGetKey;
+    private Vector3 angularVelocityAverage;
+
     void Start()
     {
         ray = new Ray();
@@ -101,10 +107,13 @@ public class AttachTest : MonoBehaviour
 
                         //Completed the attach effect
                         transform.position = Vector3.Lerp(transform.position, currentNode.position, Time.deltaTime * attachSpeed);
+                        transform.rotation = Quaternion.Lerp(transform.rotation,currentNode.rotation,Time.deltaTime *attachSpeed);
                         transform.SetParent(currentNode);
                         GetComponent<Rigidbody>().isKinematic = true;
 
-                        lastPosition = transform.position;
+                        angularVelocityGetKey = Pvr_UnitySDKAPI.Controller.UPvr_GetAngularVelocity(mainHandNess);
+
+                        //lastPosition = transform.position;
                     }
 
                 }
@@ -124,9 +133,17 @@ public class AttachTest : MonoBehaviour
                     transform.SetParent(null);
                     GetComponent<Rigidbody>().isKinematic = false;
 
-                    currentPosition = transform.position;
-                    movementDirection = (currentPosition - lastPosition);
-                    GetComponent<Rigidbody>().AddForce(movementDirection * throwSpeed);
+                    angularVelocity = Pvr_UnitySDKAPI.Controller.UPvr_GetAngularVelocity(mainHandNess);
+                    angularVelocityAverage = (angularVelocityGetKey + angularVelocity) / 2;
+                    linearVelocity = Pvr_UnitySDKAPI.Controller.UPvr_GetVelocity(mainHandNess);
+
+                    GetComponent<Rigidbody>().angularVelocity = angularVelocityAverage * 0.0001f * throwSpeed;
+                    GetComponent<Rigidbody>().velocity = linearVelocity * 0.0001f * throwSpeed;
+                    
+
+                    //currentPosition = transform.position;
+                    //movementDirection = (currentPosition - lastPosition);
+                    //GetComponent<Rigidbody>().AddForce(movementDirection * throwSpeed);
                     moveState = false;
                 }
                 
