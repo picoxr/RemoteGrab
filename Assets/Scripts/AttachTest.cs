@@ -111,9 +111,9 @@ public class AttachTest : MonoBehaviour
                         transform.SetParent(currentNode);
                         GetComponent<Rigidbody>().isKinematic = true;
 
+                        //The reason for using "Input.GetKey" is to get a more accurate motion trend in 2 frams.
                         angularVelocityGetKey = Pvr_UnitySDKAPI.Controller.UPvr_GetAngularVelocity(mainHandNess);
 
-                        //lastPosition = transform.position;
                     }
 
                 }
@@ -140,10 +140,6 @@ public class AttachTest : MonoBehaviour
                     GetComponent<Rigidbody>().angularVelocity = angularVelocityAverage * 0.0001f * throwSpeed;
                     GetComponent<Rigidbody>().velocity = linearVelocity * 0.0001f * throwSpeed;
                     
-
-                    //currentPosition = transform.position;
-                    //movementDirection = (currentPosition - lastPosition);
-                    //GetComponent<Rigidbody>().AddForce(movementDirection * throwSpeed);
                     moveState = false;
                 }
                 
