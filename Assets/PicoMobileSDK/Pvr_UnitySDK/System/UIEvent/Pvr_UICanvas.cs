@@ -46,12 +46,9 @@ public class Pvr_UICanvas : MonoBehaviour
         var canvasSize = canvasRectTransform.sizeDelta;
 
         var defaultRaycaster = canvas.gameObject.GetComponent<GraphicRaycaster>();
-        if (!defaultRaycaster)
-        {
-            defaultRaycaster = canvas.gameObject.AddComponent<GraphicRaycaster>();
-        }
-
         var customRaycaster = canvas.gameObject.GetComponent<Pvr_UIGraphicRaycaster>();
+
+
         if (!customRaycaster)
         {
             customRaycaster = canvas.gameObject.AddComponent<Pvr_UIGraphicRaycaster>();
@@ -61,7 +58,7 @@ public class Pvr_UICanvas : MonoBehaviour
         {
             customRaycaster.ignoreReversedGraphics = defaultRaycaster.ignoreReversedGraphics;
             customRaycaster.blockingObjects = defaultRaycaster.blockingObjects;
-            //defaultRaycaster.enabled = false;
+            defaultRaycaster.enabled = false;
         }
         if (!canvas.gameObject.GetComponent<BoxCollider>())
         {

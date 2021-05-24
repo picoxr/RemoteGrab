@@ -78,11 +78,11 @@ public class Pvr_ControllerModuleInit : MonoBehaviour
     {
         if (Variety == ControllerVariety.Controller0)
         {
-            //StartCoroutine(ShowOrHideRay(0));
+            StartCoroutine(ShowOrHideRay(0));
         }
         if (Variety == ControllerVariety.Controller1)
         {
-            //StartCoroutine(ShowOrHideRay(1));
+            StartCoroutine(ShowOrHideRay(1));
         }
     }
     private IEnumerator ShowOrHideRay(int id)

@@ -243,4 +243,15 @@ public class Pvr_UnitySDKEyeOverlay : MonoBehaviour, IComparable<Pvr_UnitySDKEye
         Overlay = 0,
         Underlay = 1
     }
+
+    public enum OverlayTexFilterMode
+    {
+        NotCare = 0,
+        Nearest = 1,
+        Linear = 2,
+        Nearest_Mipmap_Nearest = 3,
+        Linear_Mipmap_Nearest = 4,
+        Nearest_Mipmap_Linear = 5,
+        Linear_Mipmap_Linear = 6
+    }
 }

@@ -200,7 +200,17 @@ public class Pvr_UnitySDKSensor
         {
             try
             {
-                int returns = Pvr_UnitySDKAPI.Sensor.UPvr_GetMainSensorState(ref x, ref y, ref z, ref w, ref px, ref py, ref pz, ref vfov, ref hfov, ref Pvr_UnitySDKRender.Instance.RenderviewNumber);
+                int returns = -1;
+                if (Pvr_UnitySDKManager.SDK.ShowVideoSeethrough)
+                {
+                    BoundarySystem_Ext.Pvr_BoundarySystem.Instance.CameraFramePtr = BoundarySystem_Ext.Pvr_BoundaryAPI.UPvr_GetCameraData_Ext();
+                    returns = BoundarySystem_Ext.Pvr_BoundaryAPI.UPvr_GetMainSensorStateExt(ref x, ref y, ref z, ref w, ref px, ref py, ref pz, ref vfov, ref hfov, ref Pvr_UnitySDKRender.Instance.RenderviewNumber);
+                }
+                else
+                {
+                    returns = Pvr_UnitySDKAPI.Sensor.UPvr_GetMainSensorState(ref x, ref y, ref z, ref w, ref px, ref py, ref pz, ref vfov, ref hfov, ref Pvr_UnitySDKRender.Instance.RenderviewNumber);
+                }
+
                 Pvr_UnitySDKManager.SDK.posStatus = Sensor.UPvr_Get6DofSensorQualityStatus();
                 if (returns == 0)
                 {

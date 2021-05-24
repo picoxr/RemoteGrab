@@ -6,6 +6,7 @@ public class GetSeeThroughImage : MonoBehaviour
     public RawImage viewImage_left,viewImage_right;
     private int width, height;
     private RenderTexture cameraTex_left,cameraTex_right;
+    private bool cameraPreview;
     void Start()
     {
         CreateTexture();
@@ -16,6 +17,15 @@ public class GetSeeThroughImage : MonoBehaviour
         if (Input.GetKey(KeyCode.JoystickButton0))
         {
             DrawTexture();
+        }
+    }
+
+    void OnDestory()
+    {
+        if (cameraPreview)
+        {
+            cameraPreview = false;
+            Pvr_UnitySDKAPI.BoundarySystem.UPvr_StopCameraFrame(); 
         }
     }
     private void CreateTexture()
@@ -36,6 +46,11 @@ public class GetSeeThroughImage : MonoBehaviour
     }
     private void DrawTexture()
     {
+        if (!cameraPreview)
+        {
+            cameraPreview = true;
+            Pvr_UnitySDKAPI.BoundarySystem.UPvr_StartCameraFrame();
+        }
         //draw left camera
         Pvr_UnitySDKAPI.BoundarySystem.UPvr_BoundaryGetSeeThroughData(0, cameraTex_left);
         //draw right camera

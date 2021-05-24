@@ -25,13 +25,14 @@ public class Pvr_UnitySDKEyeOverlayEditor : Editor
             guiContent.text = "Overlay Shape";
             guiContent.tooltip = "The shape of this overlay.";
             EditorGUILayout.LabelField(guiContent, EditorStyles.boldLabel);
-            overlayTarget.overlayShape = (Pvr_UnitySDKEyeOverlay.OverlayShape)EditorGUILayout.EnumPopup("guiContent", overlayTarget.overlayShape);
+            overlayTarget.overlayShape = (Pvr_UnitySDKEyeOverlay.OverlayShape)EditorGUILayout.EnumPopup(guiContent, overlayTarget.overlayShape);
             
             EditorGUILayout.Separator();
             EditorGUILayout.LabelField("Overlay Textures", EditorStyles.boldLabel);
             guiContent.text = "External Surface";
             guiContent.tooltip = "On Android, retrieve an Android Surface object to render to (e.g., video playback).";
             overlayTarget.isExternalAndroidSurface = EditorGUILayout.Toggle(guiContent, overlayTarget.isExternalAndroidSurface);
+
             var labelControlRect = EditorGUILayout.GetControlRect();
             EditorGUI.LabelField(new Rect(labelControlRect.x, labelControlRect.y, labelControlRect.width / 2, labelControlRect.height), new GUIContent("Left Texture", "Texture used for the left eye"));
             EditorGUI.LabelField(new Rect(labelControlRect.x + labelControlRect.width / 2, labelControlRect.y, labelControlRect.width / 2, labelControlRect.height), new GUIContent("Right Texture", "Texture used for the right eye"));

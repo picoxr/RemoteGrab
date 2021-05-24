@@ -114,7 +114,7 @@ public class Pvr_Controller : MonoBehaviour
             if (controller1 != null)
                 controller1.transform.localScale = Vector3.zero;
         }
-        Invoke("ShowController", 0.1f);
+        Invoke("ShowController", 0.1f * Time.timeScale);
     }
 
     private void ShowController()

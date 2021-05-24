@@ -257,6 +257,15 @@ public class Pvr_UnitySDKManager : MonoBehaviour
     private bool mIsAndroid7 = false;
     public static Func<bool> eventEnterVRMode;
 
+    [HideInInspector]
+    public bool ShowVideoSeethrough = false;
+
+    public int SystemDebugFFRLevel = -1;
+    public int SystemFFRLevel = -1;
+    //Entitlement Check Result
+    public int AppCheckResult = 100;
+    public delegate void EntitlementCheckResult(int ReturnValue);
+    public static event EntitlementCheckResult EntitlementCheckResultEvent;
     #endregion
 
     /************************************ Private Interfaces  *********************************/
@@ -861,6 +870,8 @@ public class Pvr_UnitySDKManager : MonoBehaviour
         }
     }
 
+    public Action longPressHomeKeyAction;
+
     private void setLongHomeKey()
     {
         if (sdk.HmdOnlyrot)
@@ -874,7 +885,7 @@ public class Pvr_UnitySDKManager : MonoBehaviour
         }
         else
         {
-            if (trackingmode == 4)
+            if (trackingmode == 4 || trackingmode == 5 || trackingmode == 6)
             {
                 Pvr_UnitySDKSensor.Instance.OptionalResetUnitySDKSensor(1, 1);
 
@@ -897,16 +908,23 @@ public class Pvr_UnitySDKManager : MonoBehaviour
                 {
                     Pvr_UnitySDKSensor.Instance.ResetUnitySDKSensor();
                 }
+
             }
-            
+            if (longPressHomeKeyAction != null)
+            {
+                longPressHomeKeyAction();
+            }
         }
     }
 
     public void verifyAPPCallback(string code)
     {
         Debug.Log("PvrLog verifyAPPCallback" + code);
-        //code:0 valid
-        //code:other invalid
+        AppCheckResult = Convert.ToInt32(code);
+        if (EntitlementCheckResultEvent != null)
+        {
+            EntitlementCheckResultEvent(AppCheckResult);
+        }  
     }
 
     public void IpdRefreshCallBack(string ipd)
@@ -1020,7 +1038,6 @@ public class Pvr_UnitySDKManager : MonoBehaviour
 #endif
         Render.UPvr_GetIntConfig((int)GlobalIntConfigs.iPhoneHMDModeEnabled, ref iPhoneHMDModeEnabled);
 
-        SDKManagerInitFPS();
         Pvr_ControllerManager.ControllerStatusChangeEvent += CheckControllerStateForG2;
 #if ANDROID_DEVICE
         InitUI();
@@ -1044,6 +1061,24 @@ public class Pvr_UnitySDKManager : MonoBehaviour
         if (Pvr_UnitySDKRender.Instance != null)
         {
             Pvr_UnitySDKRender.Instance.ReInit();
+        }
+        SDKManagerInitFPS();
+        if (Pvr_UnitySDKPlatformSetting.StartTimeEntitlementCheck)
+        {
+            if (! (PlatformSettings.UPvr_IsCurrentDeviceValid() == Pvr_UnitySDKPlatformSetting.simulationType.Valid))
+            {
+                Debug.Log("DISFT Entitlement Check Simulation DO NOT PASS");
+                string appID = Pvr_UnitySDKPlatformSetting.Instance.appID;
+                Debug.Log("DISFT Start-time Entitlement Check Enable");
+                PLOG.I("DISFT Start-time Entitlement Check APPID :" + appID);
+                // 0:success -1:invalid params -2:service not exist -3:time out
+                PlatformSettings.UPvr_AppEntitlementCheckExtra(appID);
+            }
+            else
+            {
+                Debug.Log("DISFT Entitlement Check Simulation PASS");
+            }
+                  
         }
 #if UNITY_EDITOR
         yield break;
@@ -1164,27 +1199,53 @@ public class Pvr_UnitySDKManager : MonoBehaviour
 
     private void OnApplicationPause(bool pause)
     {
-        Debug.Log("OnApplicationPause-------------------------" + (pause ? "true" : "false"));
+		bool unityPause = pause;
+        Debug.Log("OnApplicationPause-------------------------" + (unityPause ? "true" : "false"));
+       
 #if UNITY_ANDROID && !UNITY_EDITOR
-        if (Pvr_UnitySDKAPI.System.UPvr_IsPicoActivity())
+        if (Pvr_UnitySDKAPI.System.UPvr_IsPicoActivity() && !Pvr_UnitySDKRender.Instance.isShellMode)
         {
             bool state = Pvr_UnitySDKAPI.System.UPvr_GetMainActivityPauseStatus();
-            PLOG.I("Current Activity Pause State:" + state);
+            Debug.Log("OnApplicationPause-------------------------Activity Pause State:" + state);
             pause = state;
         }
-
-        if (pause)
-        { 
-            onResume = false;
-            OnPause();
-        }
-        else
-        {             
-            onResume = true;
-            GL.InvalidateState();
-            StartCoroutine(OnResume());
-        }
+		if(unityPause == pause)
+        {
+			if (pause)
+			{ 
+				onResume = false;
+				OnPause();
+			}
+			else
+			{             
+				onResume = true;
+				GL.InvalidateState();
+				StartCoroutine(OnResume());
+			}
+		}
+		else
+		{
+			if (pause)
+			{ 
+				Debug.Log("OnApplicationPause-------------------------Activity pause Unity resume");
+				GL.InvalidateState();
+				StartCoroutine(OnResume());
+				onResume = false;
+				OnPause();
+			}
+			else
+			{    
+				Debug.Log("OnApplicationPause-------------------------Activity resume Unity pause");		
+				OnPause();		
+				onResume = true;
+				GL.InvalidateState();
+				StartCoroutine(OnResume());
+			}
+		}
 #endif
+
+        
+       
     }
 
     public void EnterVRMode()
@@ -1315,5 +1376,29 @@ public class Pvr_UnitySDKManager : MonoBehaviour
         this.EnterVRMode();
         Pvr_UnitySDKAPI.System.UPvr_StartHomeKeyReceiver(this.gameObject.name);
         Pvr_UnitySDKEye.setLevel = false;
+        if (longPressHomeKeyAction != null)
+        {
+            longPressHomeKeyAction();
+        }
+        if ( Pvr_UnitySDKAPI.Render.UPvr_GetIntSysProc("pvrsist.foveation.level",ref SystemDebugFFRLevel) ) 
+        {
+            Pvr_UnitySDKAPI.Render.SetFoveatedRenderingLevel((EFoveationLevel)(SystemDebugFFRLevel));
+            Debug.Log("DISFT OnResume Get System Debug ffr level is : " + SystemDebugFFRLevel);
+        }
+        else
+        {
+            Debug.Log("DISFT OnResume Get System Debug ffr level Error,ffr level is : " + SystemDebugFFRLevel);
+        }
+            
+        if (SystemDebugFFRLevel == -1)
+        {
+            Pvr_UnitySDKAPI.Render.UPvr_GetIntConfig((int)GlobalIntConfigs.EnableFFRBYSYS, ref SystemFFRLevel);
+            if (SystemFFRLevel != -1)
+            {
+                Pvr_UnitySDKAPI.Render.SetFoveatedRenderingLevel((EFoveationLevel)(SystemFFRLevel));
+                Debug.Log("DISFT OnResume Get System ffr level is : " + SystemFFRLevel);
+            }
+        } 
+        
     }
 }

@@ -64,7 +64,7 @@ public class Pvr_UnitySDKRender
     public bool isSwitchSDK = false;
     public int RenderviewNumber = 0;
     public bool isFirstStartup = true;
-
+    public bool isShellMode = false;
     private StereoRenderingPathPico stereoRenderPath = StereoRenderingPathPico.MultiPass;
     public StereoRenderingPathPico StereoRenderPath
     {
@@ -169,6 +169,8 @@ public class Pvr_UnitySDKRender
                 bool isPresentationExisted = Pvr_UnitySDKAPI.System.UPvr_IsPresentationExisted();
                 Debug.Log("ConnectToAndriod presentation existed ?-------------" + isPresentationExisted.ToString());
             }
+            isShellMode = GetIsShellMode();
+            Debug.Log("ConnectToAndriod isShellMode ?-------------" + isShellMode.ToString());
         }
         catch (AndroidJavaException e)
         {
@@ -408,7 +410,10 @@ public class Pvr_UnitySDKRender
             {
                 Pvr_UnitySDKAPI.Render.UPvr_SetColorspaceType(1);
             }
-
+            
+            //for casting color space , using Gamma set  0, Linear ---- 1
+            //Pvr_UnitySDKAPI.Render.UPvr_SetCastingColorspaceType(0);
+            
             Pvr_UnitySDKPluginEvent.Issue(RenderEventType.InitRenderThread);
             isInitrenderThread = true;
             if (StereoRendering != null)
@@ -474,5 +479,37 @@ public class Pvr_UnitySDKRender
         return true;
     }
 
+
+    public bool GetIsShellMode()
+    {
+#if ANDROID_DEVICE
+        if (null == activity )
+        {
+            return false;
+        }
+        AndroidJavaObject packageManager = activity.Call<AndroidJavaObject>("getPackageManager");
+        using (AndroidJavaObject applicationInfo =
+            packageManager.Call<AndroidJavaObject>("getApplicationInfo",  activity.Call<string>("getPackageName"),0x00000080))
+        {
+            var metaData = applicationInfo.Get<AndroidJavaObject>("metaData");
+            if (metaData != null)
+            {
+                int shellModeValue = 0;
+                shellModeValue  = metaData.Call<int>("getInt", "shell_mode");
+                if (shellModeValue == 1)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+             
+        }
+#endif
+        return false;
+    }
+    
     #endregion
 }

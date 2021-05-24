@@ -30,7 +30,9 @@ public enum RenderEventType
     BoundaryRenderRight,
     BothEyeEndFrame,
     CameraFrameLeft,
-    CameraFrameRight
+    CameraFrameRight,
+    StartCameraFrame,
+    StopCameraFrame
 }
 /// <summary>
 /// Communicates with native plugin functions that run on the rendering thread.

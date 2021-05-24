@@ -76,6 +76,7 @@ public class Pvr_ControllerDemo : MonoBehaviour
         if (HeadSetController.activeSelf)
         {
             HeadSetController.transform.parent.localRotation = Quaternion.Euler(Pvr_UnitySDKSensor.Instance.HeadPose.Orientation.eulerAngles.x, Pvr_UnitySDKSensor.Instance.HeadPose.Orientation.eulerAngles.y, 0);
+            HeadSetController.transform.parent.localPosition = Pvr_UnitySDKSensor.Instance.HeadPose.Position;
 
             ray.direction = HeadSetController.transform.position - HeadSetController.transform.parent.parent.Find("Head").position;
             ray.origin = HeadSetController.transform.parent.parent.Find("Head").position;
@@ -222,7 +223,6 @@ public class Pvr_ControllerDemo : MonoBehaviour
                     if(Pvr_ControllerManager.Instance.LengthAdaptiveRay)
                     {
                         currentController.transform.Find("dot").localScale = new Vector3(0.178f, 0.178f, 1);
-                        currentController.transform.Find("dot").position = currentController.transform.position + currentController.transform.forward.normalized * (0.5f + rayDefaultLength);
                     }
                 }
 #if UNITY_EDITOR
